@@ -170,20 +170,36 @@
   });
 
   function handleFile(file) {
-    if (file.size > 10 * 1024 * 1024) {
-      alert('File is too large. Please use an image under 10MB.');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = e => {
-      const dataUrl = e.target.result;
-      const mimeType = file.type || 'image/jpeg';
-      const base64 = dataUrl.split(',')[1];
+    if (!file.type.startsWith('image/')) return;
+    // Compress before processing — mobile photos can be 8MB+
+    compressImage(file, 1024, 0.85).then(({ base64, mimeType, dataUrl }) => {
       currentImage = { base64, mimeType, dataUrl };
       showPreview(dataUrl);
-    };
-    reader.readAsDataURL(file);
+    });
+  }
+
+  // Compress & resize image to max dimension, returns { base64, mimeType, dataUrl }
+  function compressImage(file, maxDim, quality) {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+            else                { width = Math.round(width * maxDim / height);  height = maxDim; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve({ base64: dataUrl.split(',')[1], mimeType: 'image/jpeg', dataUrl });
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   function showPreview(dataUrl) {

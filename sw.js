@@ -3,16 +3,15 @@
    Caches the app shell for offline use
    ============================================================ */
 
-const CACHE = 'snapsight-v1';
+const CACHE = 'snapsight-v2';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/app.js',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap'
+  '/snapsight/',
+  '/snapsight/index.html',
+  '/snapsight/styles.css',
+  '/snapsight/app.js',
+  '/snapsight/manifest.json',
+  '/snapsight/icons/icon-192.png',
+  '/snapsight/icons/icon-512.png',
 ];
 
 // Install — cache all assets

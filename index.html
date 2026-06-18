@@ -2,12 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>SnapSight — AI Photo Analyzer</title>
-  <meta name="description" content="Instantly analyze any photo with Llama Vision AI via Groq. Identify objects, places, scenes, and get detailed descriptions in seconds." />
+  <meta name="description" content="Analyze any photo with AI. Identify objects, places, scenes, text and more. Free via Groq." />
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#e8001c" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SnapSight" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -258,6 +269,56 @@
     <p>Powered by <strong>Llama 4 Scout Vision via Groq</strong> — 100% Free · No credit card needed</p>
   </footer>
 
+  <!-- Install Banner -->
+  <div class="install-banner" id="installBanner" style="display:none;" role="banner">
+    <div class="install-banner-inner">
+      <img src="icons/icon-192.png" class="install-icon" alt="SnapSight icon" />
+      <div class="install-text">
+        <strong>Install SnapSight</strong>
+        <span>Add to home screen for quick access</span>
+      </div>
+      <button class="install-btn" id="installBtn">Install</button>
+      <button class="install-dismiss" id="installDismiss" aria-label="Dismiss">✕</button>
+    </div>
+  </div>
+
   <script src="app.js"></script>
+  <script>
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+
+    // PWA Install prompt
+    let deferredPrompt;
+    const installBanner = document.getElementById('installBanner');
+    const installBtn    = document.getElementById('installBtn');
+    const dismissBtn    = document.getElementById('installDismiss');
+
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBanner.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBanner.style.display = 'none';
+    });
+
+    dismissBtn.addEventListener('click', () => {
+      installBanner.style.display = 'none';
+    });
+
+    window.addEventListener('appinstalled', () => {
+      installBanner.style.display = 'none';
+      deferredPrompt = null;
+    });
+  </script>
 </body>
 </html>
